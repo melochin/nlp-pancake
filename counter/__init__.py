@@ -1,5 +1,7 @@
 import numpy as np
 
+from counter.similarity import cos
+
 
 class WordCounter:
 
@@ -49,13 +51,35 @@ def create_co_matrix(word_ids, size: int, window_size=1):
     return co_matrix
 
 
-text = 'You say goodbye and i say hello.'
-word_counter = WordCounter(text)
-id_to_word = word_counter.convert_id_to_word()
-word_to_id = word_counter.convert_word_to_id()
-words = word_counter.get_words()
+def top(C, word, word_to_id, id_to_word):
+    word = word.lower()
 
-# 将单词列表转换为id
-word_id_list = [word_to_id[w] for w in words]
+    if word not in word_to_id:
+        print(f"error word {word}")
+        return
 
-print(create_co_matrix(word_id_list, len(word_to_id), 1))
+    current_id = word_to_id[word]
+    sim = np.zeros(len(C))
+
+    for i in range(len(C)):
+        if i == current_id:
+            continue
+        sim[i] = cos(C[current_id], C[i])
+
+    for i in (-1 * sim).argsort():
+        print(f'similarity {sim[i]}, word {id_to_word[i]}')
+
+
+if __name__ == '__main__':
+    text = 'You say goodbye and i say hello.'
+    word_counter = WordCounter(text)
+    id_to_word = word_counter.convert_id_to_word()
+    word_to_id = word_counter.convert_word_to_id()
+    words = word_counter.get_words()
+
+    # 将单词列表转换为id
+    word_id_list = [word_to_id[w] for w in words]
+
+    C = create_co_matrix(word_id_list, len(word_to_id), 1)
+
+    top(C, 'you', word_to_id, id_to_word)

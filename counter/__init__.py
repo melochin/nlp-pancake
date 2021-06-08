@@ -1,7 +1,8 @@
 import numpy as np
 
+from common.utils import ppmi
 from counter.similarity import cos
-
+import matplotlib.pyplot as plt
 
 class WordCounter:
 
@@ -83,3 +84,12 @@ if __name__ == '__main__':
     C = create_co_matrix(word_id_list, len(word_to_id), 1)
 
     top(C, 'you', word_to_id, id_to_word)
+
+    W = ppmi(C)
+    U, S, V = np.linalg.svd(W)
+
+    for word, word_id in word_to_id.items():
+        plt.annotate(word, (U[word_id, 0], U[word_id, 1]))
+
+    plt.scatter(U[:,0], U[:,1])
+    plt.show()
